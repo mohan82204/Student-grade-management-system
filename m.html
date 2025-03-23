@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #74EBD5, #ACB6E5);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: #ffffff;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 50px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.03);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        tr:hover {
+            background: #e0f7fa;
+        }
+        .high-score {
+            color: #2e7d32;
+            font-weight: bold;
+            background: #c8e6c9;
+        }
+        .low-score {
+            color: #d32f2f;
+            font-weight: bold;
+            background: #ffcdd2;
+        }
+        button:hover {
+            transform: scale(1.05);
+            transition: 0.2s;
+        }
+        input, button {
+            transition: all 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 8px #4CAF50;
+        }
+    </style>
+</head>
+<body>
+<div class="container max-w-5xl">
+    <h1 class="text-5xl font-extrabold mb-8 text-center text-blue-700">Student Grade Management</h1>
+    
+    <div class="mb-6">
+        <input id="studentName" type="text" placeholder="Student Name" class="w-full p-4 border rounded-lg mb-4">
+        <div class="flex gap-4 mb-4">
+            <input id="newSubject" type="text" placeholder="New Subject" class="w-full p-4 border rounded-lg">
+            <button onclick="addSubjectColumn()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Subject</button>
+        </div>
+        <button onclick="addGrade()" class="bg-green-500 text-white px-8 py-4 rounded-lg w-full shadow-lg hover:bg-green-600">Add Grade</button>
+    </div>
+    
+    <table id="gradeTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    let grades = [];
+    let subjects = [];
+
+    function addSubjectColumn() {
+        const newSubject = document.getElementById('newSubject').value.trim();
+        if (newSubject && !subjects.includes(newSubject)) {
+            subjects.push(newSubject);
+            updateTableHeaders();
+            document.getElementById('newSubject').value = '';
+        } else {
+            alert('Enter a valid, unique subject name.');
+        }
+    }
+
+    function updateTableHeaders() {
+        const table = document.getElementById('gradeTable');
+        const headerRow = table.querySelector('thead tr');
+        
+        // Clear existing headers except name, total, and actions
+        headerRow.innerHTML = '<th>Name</th>';
+        subjects.forEach(subject => {
+            headerRow.innerHTML += `<th>${subject}</th>`;
+        });
+        headerRow.innerHTML += '<th>Total</th><th>Actions</th>';
+    }
+
+    function addGrade() {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name || subjects.length === 0) {
+            alert('Enter a student name and at least one subject.');
+            return;
+        }
+
+        const scores = {};
+        let total = 0;
+        subjects.forEach(subject => {
+            const score = parseFloat(prompt(`Enter grade for ${subject}:`)) || 0;
+            scores[subject] = score;
+            total += score;
+        });
+
+        grades.push({ name, scores, total });
+        renderTable();
+        document.getElementById('studentName').value = '';
+    }
+
+    function renderTable() {
+        const tableBody = document.querySelector('#gradeTable tbody');
+        tableBody.innerHTML = '';
+        
+        grades.forEach((grade, index) => {
+            let row = `<tr>
+                <td>${grade.name}</td>`;
+            subjects.forEach(subject => {
+                const score = grade.scores[subject] || 0;
+                const className = score >= 85 ? 'high-score' : score <= 50 ? 'low-score' : '';
+                row += `<td class="${className}">${score}</td>`;
+            });
+            row += `
+                <td>${grade.total}</td>
+                <td>
+                    <button onclick="deleteGrade(${index})" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function deleteGrade(index) {
+        grades.splice(index, 1);
+        renderTable();
+    }
+</script>
+</body>
+</html>
